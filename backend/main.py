@@ -13,6 +13,12 @@ from db_models import Complaint, User
 from pydantic import BaseModel, Field
 from enum import Enum
 
+from math import radians, sin, cos, sqrt, atan2
+from datetime import datetime, timedelta
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -35,7 +41,8 @@ app = FastAPI(
     title="CivicPulse API",
     description="AI-powered civic complaint prioritization system",
     version="0.1.0",
-    )
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -44,10 +51,8 @@ app.add_middleware(
     ],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
-
-
 
 Base.metadata.create_all(bind=engine)
 
@@ -99,8 +104,43 @@ class ComplaintSort(str, Enum):
     newest = "newest"
     oldest = "oldest"
 
+
 class ComplaintDepartmentUpdate(BaseModel):
     department: str
+
+
+
+
+def distance_meters(lat1, lon1, lat2, lon2):
+    R = 6371000  # Earth radius in meters
+
+    lat1 = radians(lat1)
+    lat2 = radians(lat2)
+
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+
+    a = (
+        sin(dlat / 2) ** 2
+        + cos(lat1)
+        * cos(lat2)
+        * sin(dlon / 2) ** 2
+    )
+
+    return 2 * R * atan2(sqrt(a), sqrt(1 - a))
+
+
+def text_similarity(text1, text2):
+    vectorizer = TfidfVectorizer()
+
+    vectors = vectorizer.fit_transform([text1, text2])
+
+    return cosine_similarity(
+        vectors[0],
+        vectors[1]
+    )[0][0]
+
+
 
 
 @app.post("/register")
@@ -185,7 +225,6 @@ def login(
     }
 
 
-
 def get_current_user(
     token: str = Depends(oauth2_scheme),
 ):
@@ -228,13 +267,14 @@ def get_current_admin(
 
     return current_user
 
+
 @app.patch(
-    "/complaints/{complaint_id}/department",
+    "/complaints/{complaint_id}/status",
     response_model=ComplaintResponse,
 )
-def update_complaint_department(
+def update_complaint_status(
     complaint_id: int,
-    department_update: ComplaintDepartmentUpdate,
+    status_update: ComplaintStatusUpdate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_admin),
 ):
@@ -250,13 +290,39 @@ def update_complaint_department(
             detail="Complaint not found",
         )
 
-    complaint.department = department_update.department
+    print("\n========== STATUS UPDATE ==========")
+    print("Updating complaint:", complaint.id)
+    print("New status:", status_update.status)
+
+    # Update the selected complaint
+    complaint.status = status_update.status
+
+    # Find complaints that directly point to this complaint
+    duplicates = (
+        db.query(Complaint)
+        .filter(
+            Complaint.duplicate_of == complaint.id
+        )
+        .all()
+    )
+
+    print("Duplicates found:", len(duplicates))
+
+    for duplicate in duplicates:
+        print(
+            f"Duplicate {duplicate.id}: "
+            f"{duplicate.status} -> {status_update.status}"
+        )
+
+        duplicate.status = status_update.status
 
     db.commit()
+
     db.refresh(complaint)
 
-    return complaint
+    print("===================================\n")
 
+    return complaint
 
 
 
@@ -423,27 +489,25 @@ def update_complaint_status(
     return complaint
 
 
-
-
 @app.post("/complaints", response_model=ComplaintResponse)
 def create_complaint(
-        complaint: ComplaintCreate,
-        db: Session = Depends(get_db),
-        current_user: dict = Depends(get_current_user),
-        ):
+    complaint: ComplaintCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
 
+    # -------------------------
     # AI analysis
+    # -------------------------
+
     analysis_data = analyze(complaint.text)
     analysis = ComplaintAnalysis(**analysis_data)
-
 
     category = analysis.category
     severity = analysis.severity
     urgency = analysis.urgency
     safety_risk = analysis.safety_risk
     public_impact = analysis.public_impact
-
-
 
     priority_score = calculate_priority(
         severity=severity,
@@ -454,7 +518,64 @@ def create_complaint(
 
     department = get_department(category)
 
+    # -------------------------
+    # Duplicate detection
+    # -------------------------
 
+    duplicate_id = None
+
+    cutoff = datetime.utcnow() - timedelta(days=30)
+
+    recent_complaints = (
+        db.query(Complaint)
+        .filter(
+            Complaint.category == category,
+            Complaint.created_at >= cutoff,
+        )
+        .all()
+    )
+
+    print("\n========== DUPLICATE CHECK ==========")
+    print("New complaint:", complaint.text)
+    print("New category:", category)
+    print("Candidates:", len(recent_complaints))
+
+    for existing in recent_complaints:
+
+        distance = distance_meters(
+            complaint.latitude,
+            complaint.longitude,
+            existing.latitude,
+            existing.longitude,
+        )
+
+        similarity = text_similarity(
+            complaint.text,
+            existing.text,
+        )
+
+        print("\nExisting ID:", existing.id)
+        print("Existing text:", existing.text)
+        print("Existing category:", existing.category)
+        print("Distance:", distance)
+        print("Similarity:", similarity)
+
+        if distance <= 100 and similarity >= 0.6:
+            duplicate_id = existing.id
+
+            print(
+                ">>> DUPLICATE FOUND:",
+                existing.id
+            )
+
+            break
+
+    print("FINAL duplicate_id:", duplicate_id)
+    print("=====================================\n")
+
+    # -------------------------
+    # Create complaint
+    # -------------------------
 
     db_complaint = Complaint(
         user_id=current_user["id"],
@@ -462,22 +583,30 @@ def create_complaint(
         text=complaint.text,
         latitude=complaint.latitude,
         longitude=complaint.longitude,
+
         category=category,
         department=department,
+
         severity=severity,
         urgency=urgency,
         safety_risk=safety_risk,
         public_impact=public_impact,
-        priority_score=priority_score,
-        status="pending",
-    )
 
+        priority_score=priority_score,
+
+        status="pending",
+
+        duplicate_of=duplicate_id,
+    )
 
     db.add(db_complaint)
     db.commit()
     db.refresh(db_complaint)
 
     return db_complaint
+
+
+
 
 #    return {
 #        "id": db_complaint.id,

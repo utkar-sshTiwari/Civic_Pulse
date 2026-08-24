@@ -40,4 +40,3 @@ def create_access_token(user_id: int, role: str) -> str:
         SECRET_KEY,
         algorithm=ALGORITHM,
     )
-

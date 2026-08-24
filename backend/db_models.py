@@ -6,6 +6,7 @@ from database import Base
 from sqlalchemy import DateTime
 from datetime import datetime
 
+
 class Complaint(Base):
     __tablename__ = "complaints"
 
@@ -14,8 +15,16 @@ class Complaint(Base):
         autoincrement=True,
     )
 
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    user = relationship("User", back_populates="complaints")
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+
+    user = relationship(
+        "User",
+        back_populates="complaints",
+    )
 
     text: Mapped[str] = mapped_column(String)
     latitude: Mapped[float] = mapped_column(Float)
@@ -31,14 +40,41 @@ class Complaint(Base):
 
     priority_score: Mapped[float] = mapped_column(Float)
 
+    # =========================
+    # COMPLAINT WORKFLOW
+    # =========================
 
-        # Complaint workflow
     status: Mapped[str] = mapped_column(
         String,
         default="pending",
     )
 
-    # Timestamps
+    # ID of the original complaint
+    # if this complaint is a duplicate
+    duplicate_of: Mapped[int | None] = mapped_column(
+        ForeignKey("complaints.id"),
+        nullable=True,
+    )
+
+    # Original complaint
+    original_complaint = relationship(
+        "Complaint",
+        remote_side=[id],
+        foreign_keys=[duplicate_of],
+        back_populates="duplicates",
+    )
+
+    # Complaints which duplicate this complaint
+    duplicates = relationship(
+        "Complaint",
+        foreign_keys=[duplicate_of],
+        back_populates="original_complaint",
+    )
+
+    # =========================
+    # TIMESTAMPS
+    # =========================
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.utcnow,
