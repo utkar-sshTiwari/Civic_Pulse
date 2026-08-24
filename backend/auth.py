@@ -1,5 +1,6 @@
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
+from fastapi import Depends, HTTPException, status
 
 from jose import jwt
 
@@ -39,3 +40,4 @@ def create_access_token(user_id: int, role: str) -> str:
         SECRET_KEY,
         algorithm=ALGORITHM,
     )
+

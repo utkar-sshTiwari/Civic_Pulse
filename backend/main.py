@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Depends, Query, HTTPException
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from models import ComplaintCreate, ComplaintAnalysis, UserCreate, Token
 from priority import calculate_priority, get_department
 
@@ -33,7 +35,18 @@ app = FastAPI(
     title="CivicPulse API",
     description="AI-powered civic complaint prioritization system",
     version="0.1.0",
+    )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
 
 
 Base.metadata.create_all(bind=engine)
@@ -85,6 +98,9 @@ class ComplaintSort(str, Enum):
     priority = "priority"
     newest = "newest"
     oldest = "oldest"
+
+class ComplaintDepartmentUpdate(BaseModel):
+    department: str
 
 
 @app.post("/register")
@@ -169,6 +185,7 @@ def login(
     }
 
 
+
 def get_current_user(
     token: str = Depends(oauth2_scheme),
 ):
@@ -210,6 +227,35 @@ def get_current_admin(
         )
 
     return current_user
+
+@app.patch(
+    "/complaints/{complaint_id}/department",
+    response_model=ComplaintResponse,
+)
+def update_complaint_department(
+    complaint_id: int,
+    department_update: ComplaintDepartmentUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_admin),
+):
+    complaint = (
+        db.query(Complaint)
+        .filter(Complaint.id == complaint_id)
+        .first()
+    )
+
+    if complaint is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Complaint not found",
+        )
+
+    complaint.department = department_update.department
+
+    db.commit()
+    db.refresh(complaint)
+
+    return complaint
 
 
 
