@@ -1,0 +1,511 @@
+.admin-page {
+  min-height: 100vh;
+  background: #f7f8fa;
+  color: #172033;
+}
+
+/* NAVBAR */
+
+.admin-navbar {
+  height: 68px;
+  padding: 0 48px;
+
+  background: white;
+  border-bottom: 1px solid #e6e8ec;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 18px;
+  font-weight: 650;
+
+  cursor: pointer;
+}
+
+.admin-brand-mark {
+  width: 9px;
+  height: 22px;
+
+  background: #2563eb;
+  border-radius: 2px;
+}
+
+.admin-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.admin-label {
+  font-size: 13px;
+  color: #667085;
+}
+
+.admin-nav-button {
+  border: none;
+  background: transparent;
+
+  color: #475467;
+
+  font-size: 13px;
+
+  cursor: pointer;
+}
+
+.admin-nav-button:hover {
+  color: #172033;
+}
+
+
+/* MAIN */
+
+.admin-container {
+  width: 100%;
+  max-width: 1180px;
+
+  box-sizing: border-box;
+
+  margin: 0 auto;
+
+  padding: 52px 32px 70px;
+}
+
+
+/* HEADER */
+
+.admin-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  margin-bottom: 36px;
+}
+
+.admin-eyebrow {
+  margin: 0 0 9px;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.1em;
+
+  color: #667085;
+}
+
+.admin-header h1 {
+  margin: 0;
+
+  font-size: 32px;
+  font-weight: 650;
+
+  letter-spacing: -0.035em;
+}
+
+.admin-header p {
+  margin: 9px 0 0;
+
+  color: #667085;
+
+  font-size: 14px;
+}
+
+
+/* STATISTICS */
+
+.admin-statistics {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 14px;
+
+  margin-bottom: 28px;
+}
+
+.admin-stat-card {
+  background: white;
+
+  border: 1px solid #e6e8ec;
+  border-radius: 8px;
+
+  padding: 21px 23px;
+}
+
+.admin-stat-card span {
+  display: block;
+
+  margin-bottom: 11px;
+
+  color: #667085;
+
+  font-size: 12px;
+}
+
+.admin-stat-card strong {
+  display: block;
+
+  font-size: 28px;
+  font-weight: 650;
+
+  letter-spacing: -0.03em;
+}
+
+
+/* QUEUE */
+
+.admin-queue {
+  background: white;
+
+  border: 1px solid #e6e8ec;
+  border-radius: 8px;
+
+  overflow: hidden;
+}
+
+.admin-queue-header {
+  padding: 24px 26px;
+
+  border-bottom: 1px solid #e6e8ec;
+}
+
+.admin-queue-header h2 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.admin-queue-header p {
+  margin: 6px 0 0;
+
+  color: #667085;
+
+  font-size: 13px;
+}
+
+
+/* COMPLAINT ROW */
+
+.admin-complaint-row {
+  min-height: 84px;
+
+  padding: 17px 26px;
+
+  box-sizing: border-box;
+
+  display: grid;
+
+  grid-template-columns: 70px 1fr 170px 110px 25px;
+
+  align-items: center;
+
+  gap: 18px;
+
+  border-bottom: 1px solid #eef0f3;
+
+  transition: background 0.12s ease;
+}
+
+.admin-complaint-row:last-child {
+  border-bottom: none;
+}
+
+.admin-complaint-row:hover {
+  background: #fafbfc;
+}
+
+
+/* PRIORITY */
+
+.admin-priority {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-priority-label {
+  font-size: 10px;
+
+  color: #98a2b3;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.06em;
+}
+
+.admin-priority-value {
+  font-size: 18px;
+
+  font-weight: 650;
+
+  color: #172033;
+}
+
+
+/* COMPLAINT INFO */
+
+.admin-complaint-info {
+  min-width: 0;
+}
+
+.admin-complaint-title {
+  margin: 0;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  text-transform: capitalize;
+}
+
+.admin-complaint-description {
+  margin: 5px 0 0;
+
+  color: #667085;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.admin-complaint-department {
+  margin-top: 5px;
+
+  display: block;
+
+  color: #98a2b3;
+
+  font-size: 11px;
+}
+
+
+/* STATUS */
+
+.admin-status {
+  display: inline-flex;
+
+  width: fit-content;
+
+  padding: 5px 8px;
+
+  border-radius: 4px;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  text-transform: capitalize;
+}
+
+.admin-status-pending {
+  background: #fff7ed;
+
+  color: #c2410c;
+}
+
+.admin-status-assigned {
+  background: #f1f5f9;
+
+  color: #475569;
+}
+
+.admin-status-in_progress {
+  background: #eff6ff;
+
+  color: #1d4ed8;
+}
+
+.admin-status-resolved {
+  background: #f0fdf4;
+
+  color: #15803d;
+}
+
+
+/* ARROW */
+
+.admin-complaint-arrow {
+  color: #98a2b3;
+
+  font-size: 18px;
+
+  transition: transform 0.12s ease;
+}
+
+.admin-complaint-row:hover .admin-complaint-arrow {
+  transform: translateX(2px);
+
+  color: #667085;
+}
+
+
+/* EMPTY STATE */
+
+.admin-empty {
+  padding: 60px 30px;
+
+  text-align: center;
+
+  color: #667085;
+
+  font-size: 14px;
+}
+
+
+/* LOADING / ERROR */
+
+.admin-message {
+  padding: 60px 32px;
+
+  color: #667085;
+
+  text-align: center;
+}
+
+.admin-error {
+  padding: 20px;
+
+  background: #fef3f2;
+
+  border: 1px solid #fecdca;
+
+  border-radius: 6px;
+
+  color: #b42318;
+
+  font-size: 13px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+  .admin-statistics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-complaint-row {
+    grid-template-columns: 65px 1fr 110px 25px;
+  }
+
+  .admin-complaint-department {
+    display: none;
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .admin-navbar {
+    padding: 0 20px;
+  }
+
+  .admin-container {
+    padding: 36px 20px 50px;
+  }
+
+  .admin-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+  .admin-header h1 {
+    font-size: 27px;
+  }
+
+  .admin-statistics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-complaint-row {
+    grid-template-columns: 55px 1fr 25px;
+
+    gap: 12px;
+
+    padding: 16px;
+  }
+
+  .admin-status {
+    display: none;
+  }
+
+}
+
+
+@media (max-width: 450px) {
+
+  .admin-statistics {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+.admin-filters {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.admin-filter {
+  appearance: none;
+
+  background: white;
+
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+
+  padding: 9px 32px 9px 12px;
+
+  color: #344054;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  outline: none;
+}
+
+.admin-filter:hover {
+  border-color: #98a2b3;
+}
+
+.admin-filter:focus {
+  border-color: #2563eb;
+}
+
+.admin-queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+@media (max-width: 700px) {
+  .admin-queue-header {
+    flex-direction: column;
+  }
+
+  .admin-filters {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .admin-filter {
+    width: 100%;
+  }
+}

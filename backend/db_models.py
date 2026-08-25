@@ -40,6 +40,12 @@ class Complaint(Base):
 
     priority_score: Mapped[float] = mapped_column(Float)
 
+    image_url: Mapped[str | None] = mapped_column(
+    String,
+    nullable=True,
+    )
+
+
     # =========================
     # COMPLAINT WORKFLOW
     # =========================
